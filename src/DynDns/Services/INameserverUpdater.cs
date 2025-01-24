@@ -4,5 +4,5 @@ namespace DynDns.Services;
 
 public interface INameserverUpdater
 {
-	Task<Result> UpdateAsync(string domain, string ip);
+	Task<Result> UpdateDomain(string domainName, string ip);
 }

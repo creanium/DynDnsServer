@@ -16,11 +16,20 @@ public class UpdateEndpoint(ILogger<UpdateEndpoint> logger, NameserverUpdateServ
 	{
 		logger.LogInformation("Received request to update {Hostname} with IP {IpAddress}", req.Hostname, req.IpAddress);
 
-		var updateResult = await updateService.UpdateAsync(req.Hostname, req.IpAddress);
-
-		if (updateResult.Status is ResultStatus.Invalid or ResultStatus.NotFound)
+		try
 		{
-			await SendStringAsync(ReturnCode.HostNotFound, cancellation: ct);
+			var updateResult = await updateService.UpdateDomain(req.Hostname, req.IpAddress);
+
+			if (updateResult.Status is ResultStatus.Invalid or ResultStatus.NotFound)
+			{
+				await SendStringAsync(ReturnCode.HostNotFound, cancellation: ct);
+				return;
+			}
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Error updating {Hostname} with IP {IpAddress}", req.Hostname, req.IpAddress);
+			await SendStringAsync(ReturnCode.SystemError, cancellation: ct);
 			return;
 		}
 		

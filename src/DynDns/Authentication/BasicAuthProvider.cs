@@ -9,7 +9,7 @@ using AuthenticationOptions = DynDns.Models.Options.AuthenticationOptions;
 
 namespace DynDns.Authentication;
 
-public class BasicAuthProvider(IOptionsMonitor<AuthenticationSchemeOptions> options, IOptionsMonitor<DynDnsServerOptions> serverOptions, ILoggerFactory loggerFactory, UrlEncoder encoder)
+public class BasicAuthProvider(IOptionsMonitor<AuthenticationSchemeOptions> options, IOptionsMonitor<ApplicationOptions> serverOptions, ILoggerFactory loggerFactory, UrlEncoder encoder)
 	: AuthenticationHandler<AuthenticationSchemeOptions>(options, loggerFactory, encoder)
 {
 	private readonly ILoggerFactory _loggerFactory = loggerFactory;
@@ -24,6 +24,7 @@ public class BasicAuthProvider(IOptionsMonitor<AuthenticationSchemeOptions> opti
 
 		if (IsPublicEndpoint())
 		{
+			logger.LogDebug("Public endpoint, skipping authentication");
 			return Task.FromResult(AuthenticateResult.NoResult());
 		}
 

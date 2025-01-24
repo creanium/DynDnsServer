@@ -12,5 +12,5 @@ public abstract class NameserverUpdater : INameserverUpdater
 		_options = options;
 	}
 	
-	public abstract Task<Result> UpdateAsync(string domain, string ip);
+	public abstract Task<Result> UpdateDomain(string domainName, string ip);
 }

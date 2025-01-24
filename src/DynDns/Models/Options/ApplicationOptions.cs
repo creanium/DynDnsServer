@@ -1,6 +1,6 @@
 namespace DynDns.Models.Options;
 
-public sealed class DynDnsServerOptions
+public sealed class ApplicationOptions
 {
 	public const string SectionName = "DynDnsServer";
 	

@@ -8,10 +8,10 @@ namespace DynDns.Services;
 public class NameserverUpdateService : INameserverUpdater
 {
 	private readonly ILogger<NameserverUpdateService> _logger;
-	private readonly IOptions<DynDnsServerOptions> _options;
+	private readonly IOptions<ApplicationOptions> _options;
 	private readonly ILoggerFactory _loggerFactory;
 
-	public NameserverUpdateService(ILogger<NameserverUpdateService> logger, IOptionsSnapshot<DynDnsServerOptions> options, ILoggerFactory loggerFactory)
+	public NameserverUpdateService(ILogger<NameserverUpdateService> logger, IOptionsSnapshot<ApplicationOptions> options, ILoggerFactory loggerFactory)
 	{
 		_logger = logger;
 		_options = options;
@@ -22,22 +22,22 @@ public class NameserverUpdateService : INameserverUpdater
 	}
 
 
-	public async Task<Result> UpdateAsync(string domain, string ip)
+	public async Task<Result> UpdateDomain(string domainName, string ip)
 	{
-		_logger.LogDebug("Updating {Domain} with {Ip}", domain, ip);
-		var domainOptions = _options.Value.Domains.FirstOrDefault(d => d.Name.Equals(domain, StringComparison.InvariantCultureIgnoreCase));
+		_logger.LogDebug("Updating {Domain} with {Ip}", domainName, ip);
+		var domainOptions = _options.Value.Domains.FirstOrDefault(d => d.Name.Equals(domainName, StringComparison.InvariantCultureIgnoreCase));
 		
 		if (domainOptions is null)
 		{
-			_logger.LogWarning("No domain options found for {Domain}", domain);
-			return Result.Invalid(new ValidationError("Domain", $"No domain options found for {domain}"));
+			_logger.LogWarning("No domain options found for {Domain}", domainName);
+			return Result.Invalid(new ValidationError("Domain", $"No domain options found for {domainName}"));
 		}
 		
 		var updater = GetUpdater(domainOptions);
 		_logger.LogDebug("Instantiated {UpdaterName}", updater.GetType().Name);
-		_logger.LogInformation("Updating {Domain} with {Ip} using {ProviderName}", domain, ip, domainOptions.Provider);
+		_logger.LogInformation("Updating {Domain} with {Ip} using {ProviderName}", domainName, ip, domainOptions.Provider);
 		
-		return await updater.UpdateAsync(domain, ip);
+		return await updater.UpdateDomain(domainName, ip);
 	}
 	
 	private INameserverUpdater GetUpdater(DomainOptions domainOptions)

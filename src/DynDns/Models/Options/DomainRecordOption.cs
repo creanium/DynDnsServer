@@ -12,4 +12,6 @@ public sealed class DomainRecordOption
 	
 	[Required]
 	public string Ttl { get; set; }
+
+	public bool CreateIfNotExists { get; set; } = false;
 }
