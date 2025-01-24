@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using DynDns.Enum;
 
 namespace DynDns.Models.Options;
 

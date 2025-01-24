@@ -1,5 +1,6 @@
 using DynDns.Authentication;
 using DynDns.Models.Options;
+using DynDns.Services;
 using Serilog;
 using FastEndpoints;
 using Microsoft.AspNetCore.Authentication;
@@ -11,15 +12,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog((context, configuration) =>
 	configuration.ReadFrom.Configuration(context.Configuration));
 
-builder.Services
-	.Configure<AuthenticationOptions>(builder.Configuration.GetSection(AuthenticationOptions.SectionName))
-	.Configure<DomainsOptions>(builder.Configuration.GetSection(DomainsOptions.SectionName));
+builder.Services.AddOptionsWithValidateOnStart<DynDnsServerOptions>()
+	.BindConfiguration(DynDnsServerOptions.SectionName);
 
 builder.Services
 	.AddFastEndpoints()
 	.AddAuthorization()
 	.AddAuthentication(BasicAuthProvider.SchemeName)
 	.AddScheme<AuthenticationSchemeOptions, BasicAuthProvider>(BasicAuthProvider.SchemeName, null);
+
+builder.Services
+	.AddScoped<NameserverUpdateService>();
 
 var app = builder.Build();
 

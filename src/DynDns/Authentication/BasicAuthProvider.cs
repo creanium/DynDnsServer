@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
+using DynDns.Models.Options;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
@@ -8,7 +9,7 @@ using AuthenticationOptions = DynDns.Models.Options.AuthenticationOptions;
 
 namespace DynDns.Authentication;
 
-public class BasicAuthProvider(IOptionsMonitor<AuthenticationSchemeOptions> options, IOptionsMonitor<AuthenticationOptions> authOptions, ILoggerFactory loggerFactory, UrlEncoder encoder)
+public class BasicAuthProvider(IOptionsMonitor<AuthenticationSchemeOptions> options, IOptionsMonitor<DynDnsServerOptions> serverOptions, ILoggerFactory loggerFactory, UrlEncoder encoder)
 	: AuthenticationHandler<AuthenticationSchemeOptions>(options, loggerFactory, encoder)
 {
 	private readonly ILoggerFactory _loggerFactory = loggerFactory;
@@ -18,7 +19,7 @@ public class BasicAuthProvider(IOptionsMonitor<AuthenticationSchemeOptions> opti
 	{
 		var logger = _loggerFactory.CreateLogger<BasicAuthProvider>();
 
-		var logins = authOptions.CurrentValue.Logins;
+		var logins = serverOptions.CurrentValue.Authentication.Logins;
 		logger.LogDebug("Handling Basic Authentication. Known users: {KnownUsers}", string.Join(", ", logins.Select(x => x.Username)));
 
 		if (IsPublicEndpoint())

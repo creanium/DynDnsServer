@@ -7,8 +7,8 @@ namespace DynDns.Models.Request;
 public class UpdateRequest
 {
 	[BindFrom("hostname")]
-	public string? Hostname { get; set; }
-	
+	public string Hostname { get; set; } = null!;
+
 	[BindFrom("myip")]
-	public string? IpAddress { get; set; }
+	public string IpAddress { get; set; } = null!;
 }
