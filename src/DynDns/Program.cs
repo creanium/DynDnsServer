@@ -1,13 +1,19 @@
 using DynDns.Authentication;
+using DynDns.Models.Options;
 using Serilog;
 using FastEndpoints;
 using Microsoft.AspNetCore.Authentication;
+using AuthenticationOptions = DynDns.Models.Options.AuthenticationOptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 //Add support to logging with Serilog
 builder.Host.UseSerilog((context, configuration) =>
 	configuration.ReadFrom.Configuration(context.Configuration));
+
+builder.Services
+	.Configure<AuthenticationOptions>(builder.Configuration.GetSection(AuthenticationOptions.SectionName))
+	.Configure<DomainsOptions>(builder.Configuration.GetSection(DomainsOptions.SectionName));
 
 builder.Services
 	.AddFastEndpoints()
