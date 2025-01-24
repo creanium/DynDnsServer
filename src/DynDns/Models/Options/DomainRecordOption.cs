@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DynDns.Models.Options;
 
-public sealed class DomainRecordOptions
+public sealed class DomainRecordOption
 {
 	[Required]
 	public string Name { get; set; }

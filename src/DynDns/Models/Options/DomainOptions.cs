@@ -13,5 +13,5 @@ public class DomainOptions
 
 	public string ApiKey { get; set; }
 	
-	
+	public List<DomainRecordOption> Records { get; set; }
 }

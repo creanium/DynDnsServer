@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Ardalis.Result;
 using DigitalOcean.API;
+using DigitalOcean.API.Models.Requests;
 using DynDns.Models.Options;
 using Microsoft.Extensions.Options;
 
@@ -25,13 +26,39 @@ public class DigitalOceanUpdater(DomainOptions options, ILogger<DigitalOceanUpda
 
 		logger.LogDebug("Found {Domain} in DigitalOcean", targetDomain.Name);
 
-		var records = await _client.DomainRecords.GetAll(targetDomain.Name);
-		logger.LogDebug("Got {RecordCount} domain record(s) for {DomainName}: {Records}", records?.Count, targetDomain.Name, JsonSerializer.Serialize(records));
+		var existingRecords = await _client.DomainRecords.GetAll(targetDomain.Name);
+		logger.LogDebug("Got {RecordCount} domain record(s) for {DomainName}: {Records}", existingRecords?.Count, targetDomain.Name, JsonSerializer.Serialize(existingRecords));
 
-		if (records is null)
+		if (existingRecords is null)
 		{
-			logger.LogWarning("{Domain} records not be found in configured DigitalOcean account. Did find: {FoundDomainRecords}", domain, string.Join(", ", records?.Select(d => d.Name) ?? ["<none>"]));
+			logger.LogWarning("{Domain} records not be found in configured DigitalOcean account. Did find: {FoundDomainRecords}", domain, string.Join(", ", existingRecords?.Select(d => d.Name) ?? ["<none>"]));
 			return Result.NotFound();
+		}
+
+		foreach (var record in _options.Records)
+		{
+			var targetRecord = existingRecords.FirstOrDefault(r => r.Name.Equals(record.Name, StringComparison.InvariantCultureIgnoreCase) 
+			                                               && r.Name.Equals(record.RecordType, StringComparison.InvariantCultureIgnoreCase));
+
+			if (targetRecord is null)
+			{
+				logger.LogInformation("Creating new record {RecordName} of type {RecordType} for {Domain}", record.Name, record.RecordType, targetDomain.Name);
+				await _client.DomainRecords.Create(targetDomain.Name, new DomainRecord
+				{
+					Name = record.Name,
+					Type = record.RecordType,
+					Data = ip
+				});
+				continue;
+			}
+
+			logger.LogInformation("Updating record {RecordName} of type {RecordType} for {Domain}", targetRecord.Name, targetRecord.Type, targetDomain.Name);
+			var updateRecord = new UpdateDomainRecord
+			{
+				Data = ip
+			};
+			
+			await _client.DomainRecords.Update(targetDomain.Name, targetRecord.Id, updateRecord);
 		}
 		
 		return Result.Success();
