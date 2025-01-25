@@ -54,9 +54,11 @@ public class DigitalOceanUpdater(DomainOptions options, ILogger<DigitalOceanUpda
 
 	private async Task UpdateRecord(Domain targetDomain, DigitalOcean.API.Models.Responses.DomainRecord targetRecord, DomainRecordOption recordConfig, string ip)
 	{
-		logger.LogInformation("Updating record {RecordName} of type {RecordType} for {Domain}", targetRecord.Name, targetRecord.Type, targetDomain.Name);
+		logger.LogInformation("Updating record {RecordName} of type {RecordType} for {Domain} (record ID: {RecordId})", 
+			targetRecord.Name, targetRecord.Type, targetDomain.Name, targetRecord.Id);
 		var updateRecord = new UpdateDomainRecord
 		{
+			Type = targetRecord.Type,
 			Data = ip,
 			Ttl = int.Parse(recordConfig.Ttl)
 		};
