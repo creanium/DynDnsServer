@@ -58,6 +58,7 @@ public class DigitalOceanUpdater(DomainOptions options, ILogger<DigitalOceanUpda
 			targetRecord.Name, targetRecord.Type, targetDomain.Name, targetRecord.Id);
 		var updateRecord = new UpdateDomainRecord
 		{
+			Name = targetRecord.Name,
 			Type = targetRecord.Type,
 			Data = ip,
 			Ttl = int.Parse(recordConfig.Ttl)
