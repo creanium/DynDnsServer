@@ -35,29 +35,30 @@ public class DigitalOceanUpdater(DomainOptions options, ILogger<DigitalOceanUpda
 			return Result.NotFound();
 		}
 
-		foreach (var record in _options.Records)
+		foreach (var recordConfig in _options.Records)
 		{
-			var targetRecord = existingRecords.FirstOrDefault(r => r.Name.Equals(record.Name, StringComparison.InvariantCultureIgnoreCase)
-			                                                       && r.Name.Equals(record.RecordType, StringComparison.InvariantCultureIgnoreCase));
+			var targetRecord = existingRecords.FirstOrDefault(r => r.Name.Equals(recordConfig.Name, StringComparison.InvariantCultureIgnoreCase)
+			                                                       && r.Type.Equals(recordConfig.RecordType, StringComparison.InvariantCultureIgnoreCase));
 
 			if (targetRecord is null)
 			{
-				await CreateRecord(targetDomain, record, ip);
+				await CreateRecord(targetDomain, recordConfig, ip);
 				continue;
 			}
 
-			await UpdateRecord(targetDomain, targetRecord, ip);
+			await UpdateRecord(targetDomain, targetRecord, recordConfig, ip);
 		}
 
 		return Result.Success();
 	}
 
-	private async Task UpdateRecord(Domain targetDomain, DigitalOcean.API.Models.Responses.DomainRecord targetRecord, string ip)
+	private async Task UpdateRecord(Domain targetDomain, DigitalOcean.API.Models.Responses.DomainRecord targetRecord, DomainRecordOption recordConfig, string ip)
 	{
 		logger.LogInformation("Updating record {RecordName} of type {RecordType} for {Domain}", targetRecord.Name, targetRecord.Type, targetDomain.Name);
 		var updateRecord = new UpdateDomainRecord
 		{
-			Data = ip
+			Data = ip,
+			Ttl = int.Parse(recordConfig.Ttl)
 		};
 
 		await _client.DomainRecords.Update(targetDomain.Name, targetRecord.Id, updateRecord);
@@ -77,7 +78,8 @@ public class DigitalOceanUpdater(DomainOptions options, ILogger<DigitalOceanUpda
 		{
 			Name = domainRecord.Name,
 			Type = domainRecord.RecordType,
-			Data = ip
+			Data = ip,
+			Ttl = int.Parse(domainRecord.Ttl)
 		});
 	}
 }
